@@ -11,10 +11,10 @@
  * @return The image read from the given path.
  */
 namespace is ::utils {
-cv::Mat read_image(const std::string &image_path) {
+types::Image read_image(const std::string &image_path) {
   if (image_path.empty())
     throw std::invalid_argument("Image path is empty");
-  cv::Mat image = cv::imread(image_path, cv::IMREAD_COLOR);
+  types::Image image = cv::imread(image_path, cv::IMREAD_COLOR);
   if (image.empty())
     throw std::runtime_error("Could not read the image: " + image_path);
   std::cout << "Successfully read the image: " << image_path << std::endl;
