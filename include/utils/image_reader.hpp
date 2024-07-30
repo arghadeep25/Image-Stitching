@@ -10,7 +10,7 @@
  * @param image_path The path to the image.
  * @return The image read from the given path.
  */
-namespace image_stitching ::utils {
+namespace is ::utils {
 cv::Mat read_image(const std::string &image_path) {
   if (image_path.empty())
     throw std::invalid_argument("Image path is empty");
@@ -20,6 +20,20 @@ cv::Mat read_image(const std::string &image_path) {
   std::cout << "Successfully read the image: " << image_path << std::endl;
   return image;
 }
-} // namespace image_stitching::utils
 
+/**
+ * Read images from the given paths and store in a vector.
+ * @param image_paths
+ * @return
+ */
+types::ImageBatch read_images(const std::vector<std::string> &image_paths) {
+  if (image_paths.empty())
+    throw std::invalid_argument("Image paths are empty");
+  types::ImageBatch images;
+  for (const auto &image_path : image_paths)
+    images.push_back(read_image(image_path));
+  return images;
+}
+
+} // namespace image_stitching::utils
 #endif // IMAGE_STITCHING_IMAGE_READER_HPP
