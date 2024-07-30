@@ -8,6 +8,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 find_package(OpenCV REQUIRED)
+find_package(OpenCV COMPONENTS core highgui imgproc features2d REQUIRED)
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 SET(SRC_DIR src)
@@ -16,7 +17,6 @@ SET(INCLUDE_DIR include)
 FILE(GLOB SRC_FILES ${SRC_DIR}/*.cpp)
 FILE(GLOB INCLUDE_FILES ${INCLUDE_DIR}/*.hpp)
 
-add_executable(image_stitching ${SRC_FILES} ${INCLUDE_FILES}
-        include/feature_extraction/extract_feature.hpp)
+add_executable(image_stitching ${SRC_FILES} ${INCLUDE_FILES})
 target_include_directories(image_stitching PUBLIC ${INCLUDE_DIR})
-target_link_libraries(image_stitching ${OpenCV_LIBRARIES})
+target_link_libraries(image_stitching ${OpenCV_LIBRARIES} pthread)
