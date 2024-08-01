@@ -1,3 +1,4 @@
+#include <blending/blend.hpp>
 #include <feature_extraction/extract_feature.hpp>
 #include <feature_match/match_feature.hpp>
 #include <image_matching/match_image.hpp>
@@ -14,7 +15,7 @@ int main() {
   std::vector<std::string> image_paths;
   image_paths.emplace_back("../data/001.jpg");
   image_paths.emplace_back("../data/002.jpg");
-    image_paths.emplace_back("../data/003.jpg");
+  image_paths.emplace_back("../data/003.jpg");
 
   is::types::ImageBatch images = is::utils::read_images(image_paths);
 
@@ -45,9 +46,12 @@ int main() {
 
     auto verified_matches = match_image.match(
         features[0].keypoints, features[1].keypoints, matched_features);
-        is::types::Image stitched_image;
-        cv::drawMatches(images[0], features[0].keypoints, images[1],
-                        features[1].keypoints, verified_matches, stitched_image);
-//        is::vis::display(stitched_image, "Stitched Image");
+    is::types::Image stitched_image;
+    cv::drawMatches(images[0], features[0].keypoints, images[1],
+                    features[1].keypoints, verified_matches, stitched_image);
+    //        is::vis::display(stitched_image, "Stitched Image");
+    is::blend::ImageBlending blending;
+    auto blended_image = blending.blend(images[0], images[1], homography);
+    is::vis::display(blended_image, "Blended Image");
   }
 }
