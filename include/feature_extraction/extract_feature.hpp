@@ -19,19 +19,24 @@
 
 namespace is::extract_feature {
 /**
- * Feature extraction from image batches using SIFT.
+ * The purpose of this class is to extract features from the given images.
+ * The extracted features are stored in the form of a vector. The features
+ * are extracted using the SIFT algorithm. The class is thread-safe. The
+ * extracted features can be accessed using the get_features() method.
+ * The class is not copyable or movable. The extracted features will be
+ * used for feature matching.
  */
 class FeatureExtraction {
-public:
+ public:
   FeatureExtraction() = default;
 
-public:
+ public:
   ~FeatureExtraction() {
     this->m_images_.clear();
     this->features_.clear();
   }
 
-public:
+ public:
   /**
    * Load images in the form of a vector to extract features.
    * @param images The images to extract features from.
@@ -42,7 +47,7 @@ public:
       this->m_images_.push_back(image);
   }
 
-public:
+ public:
   /**
    * Get the extracted features.
    * @return The extracted features.
@@ -59,11 +64,9 @@ public:
         local_features.push_back(feature);
       });
     }
-
     for (auto &thread : threads)
       if (thread.joinable())
         thread.join();
-
     {
       std::lock_guard<std::mutex> lock(this->m_mutex_);
       this->features_ = std::move(local_features);
@@ -72,7 +75,7 @@ public:
     return this->features_;
   }
 
-private:
+ private:
   /**
    * Extract features from the given image.
    * @param image The image to extract features from.
@@ -97,7 +100,7 @@ private:
     return feature;
   }
 
-private:
+ private:
   std::vector<cv::Mat> m_images_;
   std::vector<types::ImageFeature> features_;
   std::mutex m_mutex_;
