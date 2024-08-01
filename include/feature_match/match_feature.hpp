@@ -5,10 +5,10 @@
 #ifndef IMAGE_STITCHING_MATCH_FEATURE_HPP_
 #define IMAGE_STITCHING_MATCH_FEATURE_HPP_
 
-#include <vector>
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <utils/types.hpp>
+#include <vector>
 
 namespace is::feature_match {
 /**
@@ -18,6 +18,7 @@ namespace is::feature_match {
 class MatchFeature {
  public:
   MatchFeature() = default;
+
  public:
   ~MatchFeature() = default;
 
@@ -43,7 +44,6 @@ class MatchFeature {
         good_matches.push_back(knn_match[0]);
     return good_matches;
   }
-
 };
-}
-#endif //IMAGE_STITCHING_MATCH_FEATURE_HPP_
+}// namespace is::feature_match
+#endif//IMAGE_STITCHING_MATCH_FEATURE_HPP_
