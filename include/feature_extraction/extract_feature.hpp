@@ -18,6 +18,9 @@
 #include <vector>
 
 namespace is::extract_feature {
+/**
+ * Feature extraction from image batches using SIFT.
+ */
 class FeatureExtraction {
 public:
   FeatureExtraction() = default;
@@ -70,6 +73,11 @@ public:
   }
 
 private:
+  /**
+   * Extract features from the given image.
+   * @param image The image to extract features from.
+   * @return The extracted features.
+   */
   types::ImageFeature extract_feature(const cv::Mat &image) {
     cv::Mat image_copy = image.clone();
 
