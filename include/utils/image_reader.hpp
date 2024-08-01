@@ -35,5 +35,5 @@ types::ImageBatch read_images(const std::vector<std::string> &image_paths) {
   return images;
 }
 
-} // namespace is::utils
-#endif // IMAGE_STITCHING_IMAGE_READER_HPP
+}// namespace is::utils
+#endif// IMAGE_STITCHING_IMAGE_READER_HPP
