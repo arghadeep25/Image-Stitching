@@ -15,7 +15,7 @@ int main() {
   std::vector<std::string> image_paths;
   image_paths.emplace_back("../data/001.jpg");
   image_paths.emplace_back("../data/002.jpg");
-  image_paths.emplace_back("../data/003.jpg");
+//  image_paths.emplace_back("../data/003.jpg");
 
   is::types::ImageBatch images = is::utils::read_images(image_paths);
 
