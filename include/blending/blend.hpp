@@ -1,6 +1,10 @@
-//
-// Created by arghadeep on 31.07.24.
-//
+/**
+ * @file blend.hpp
+ * @details Image blending using multi-band blending.
+ * @author Arghadeep Mazumder
+ * @version 0.1.0
+ * @copyright -
+ */
 
 #ifndef IMAGE_STITCHING_BLEND_HPP
 #define IMAGE_STITCHING_BLEND_HPP
@@ -33,23 +37,78 @@ class ImageBlending {
    * @return The blended image.
    */
   cv::Mat blend(const cv::Mat &image1, const cv::Mat &image2, const cv::Mat &homography) {
-    cv::Size size = {image1.cols + image2.cols, image1.rows};
-    // 1. Warp image
-    auto wrapped_image1 = warp_image(image1, homography, size);
-    auto wrapped_image2 = warp_image(image2, cv::Mat::eye(3, 3, CV_64F), size);
-
-    // 2. Exposure Compensation
-    cv::Mat mask = cv::Mat::zeros(size, CV_8U);
-    cv::rectangle(mask, cv::Rect(0, 0, size.width, size.height), cv::Scalar(255), -1);
-    auto exposure_compensated_image = exposure_compensation(wrapped_image1, wrapped_image2, mask);
-
-    // 3. Find Optimal Seam
-    auto optimal_seam = find_optimal_seam(wrapped_image1, wrapped_image2);
-
-    // 4. Multi-band blending
-    auto blended_image = multi_band_blending(wrapped_image1, wrapped_image2, mask);
-    return blended_image;
+    return warp_images(image1, image2, homography);
+//    cv::Size size = {image1.cols + image2.cols, image1.rows};
+//    // 1. Warp image
+//    auto wrapped_image1 = warp_image(image1, homography, size);
+//    auto wrapped_image2 = warp_image(image2, cv::Mat::eye(3, 3, CV_64F), size);
+//
+//    // 2. Exposure Compensation
+//    cv::Mat mask = cv::Mat::zeros(size, CV_8U);
+//    cv::rectangle(mask, cv::Rect(0, 0, size.width, size.height), cv::Scalar(255), -1);
+//    auto exposure_compensated_image = exposure_compensation(wrapped_image1, wrapped_image2, mask);
+//
+//    // 3. Find Optimal Seam
+//    auto optimal_seam = find_optimal_seam(wrapped_image1, wrapped_image2);
+//
+//    // 4. Multi-band blending
+//    auto blended_image = multi_band_blending(wrapped_image1, wrapped_image2, mask);
+//    return blended_image;
   };
+
+ private:
+  /**
+   * @brief Warp images using the given homography matrix
+   * @param image1
+   * @param image2
+   * @param H
+   * @return
+   */
+  cv::Mat warp_images(const cv::Mat &image1, const cv::Mat &image2, const cv::Mat &H) {
+    // Get image dimensions
+    int h1 = image1.rows;
+    int w1 = image1.cols;
+    int h2 = image2.rows;
+    int w2 = image2.cols;
+
+    // Points for the transformed image boundaries
+    std::vector<cv::Point2f> pts1 = {cv::Point2f(0, 0), cv::Point2f(0, h1),
+                                     cv::Point2f(w1, h1), cv::Point2f(w1, 0)};
+    std::vector<cv::Point2f> pts2 = {cv::Point2f(0, 0), cv::Point2f(0, h2),
+                                     cv::Point2f(w2, h2), cv::Point2f(w2, 0)};
+
+    // Transform points to the new coordinates using the homography matrix
+    std::vector<cv::Point2f> pts2_transformed;
+    cv::perspectiveTransform(pts2, pts2_transformed, H);
+
+    // Combine the points from both images
+    std::vector<cv::Point2f> all_points = pts1;
+    all_points.insert(all_points.end(), pts2_transformed.begin(), pts2_transformed.end());
+
+    // Get the bounding box of the combined image
+    cv::Rect bbox = cv::boundingRect(all_points);
+
+    // Calculate the translation matrix
+    cv::Mat translation_matrix = (cv::Mat_<double>(3, 3) << 1, 0, -bbox.x, 0, 1, -bbox.y, 0, 0, 1);
+
+    // Warp the first image
+    cv::Mat warped_image1;
+    cv::warpPerspective(image1, warped_image1, translation_matrix * H, bbox.size());
+
+    // Warp the second image
+    cv::Mat warped_image2;
+    cv::warpPerspective(image2, warped_image2, translation_matrix, bbox.size());
+
+    // Create a mask for the second image
+    cv::Mat mask2 = (warped_image2 > 0);
+    cv::cvtColor(mask2, mask2, cv::COLOR_BGR2GRAY);
+
+    // Blend the two images together
+    cv::Mat result = warped_image1.clone();
+    warped_image2.copyTo(result, mask2);
+
+    return result;
+  }
 
  private:
   /**
@@ -78,25 +137,29 @@ class ImageBlending {
    * @return Exposure compensated image
    */
   cv::Mat exposure_compensation(const cv::Mat &image1, const cv::Mat &image2,
-                                const cv::Mat &mask) {
+                                const cv::Mat &mask, const std::string &type = "mean") {
     cv::Mat result = image1.clone();
     cv::Scalar mean1 = cv::mean(image1, mask);
     cv::Scalar mean2 = cv::mean(image2, mask);
-    // using mean difference to compensate the exposure
-    cv::Scalar meanDiff = mean2 - mean1;
-    // using gain
-//    cv::Scalar gain = mean2 / mean1;
-//    result.convertTo(result, -1, gain[0]);
-    result.convertTo(result, -1, 1, -meanDiff[0]);
+
+    if (type == "mean") {
+      cv::Scalar meanDiff = mean2 - mean1;
+      result.convertTo(result, -1, 1, -meanDiff[0]);
+    } else if (type == "gain") {
+      cv::Scalar gain = mean2 / mean1;
+      result.convertTo(result, -1, gain[0]);
+    } else {
+      std::cerr << "Error: Invalid exposure compensation type." << std::endl;
+    }
     return result;
   };
 
  private:
   /**
-   * Find optimal seam between two images
+   * Find optimal seam between two images using absolute difference between the images
    * @param image1
    * @param image2
-   * @return Optimal seam
+   * @return Gray Scale Optimal Seam
    */
   cv::Mat find_optimal_seam(const cv::Mat &image1, const cv::Mat &image2) {
     cv::Mat diff, gray_diff;
