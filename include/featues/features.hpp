@@ -17,7 +17,17 @@
 
 namespace is::features {
 /**
- * Class to extract features from the image and compute homography.
+ * @brief Class to extract features from the image and compute homography. The
+ * features are extracted using SIFT descriptor. The features are matched using
+ * Brute-Force Matcher or Flann based Matcher. The homography matrix is computed
+ * using RANSAC. The inliers are visualized if the visualization flag is set to
+ * true. The homography matrix is returned. The homography matrix is used to warp
+ * the images to align them before blending.
+ * @details The keypoints are the points of interest in the image. The descriptors
+ * are the feature vectors that describe the keypoints. The descriptors are used
+ * to match the features between the images. The keypoints are visualized using
+ * drawKeypoints. The matches are visualized using drawMatches. The matched features
+ * are displayed.
  */
 class Features {
   struct FeaturesParameters {
@@ -36,7 +46,13 @@ public:
 
 public:
   /**
-   * Compute the homography matrix using RANSAC.
+   * @brief Compute the homography matrix using RANSAC. First the features
+   * are extracted from the images using SIFT descriptor. Then the features
+   * are matched using Brute-Force Matcher or Flann based Matcher. Finally,
+   * the homography matrix is computed using RANSAC. The inliers are visualized
+   * if the visualization flag is set to true. The homography matrix is returned.
+   * @details The homography matrix is used to warp the images to align them
+   * before blending.
    * @param src_img The source image.
    * @param dst_img The destination image.
    * @return The homography matrix.
@@ -78,9 +94,16 @@ public:
 
 private:
   /**
-   * Extract features from the image.
-   * @param img The image.
-   * @return The image features.
+   * @brief Extract features from the image using SIFT descriptor. The
+   * keypoints and descriptors are returned. If the image is colored, it is
+   * converted to grayscale. The keypoints and descriptors are used to match
+   * the features between the images.
+   * @details The keypoints are the points of interest in the image. The
+   * descriptors are the feature vectors that describe the keypoints. The
+   * descriptors are used to match the features between the images. The
+   * keypoints are visualized using drawKeypoints.
+   * @param img source image from which the features will be extracted.
+   * @return extracted image features.
    */
   types::ImageFeature extract_features(const cv::Mat &img) {
     cv::Mat img_clone = img.clone();
@@ -105,7 +128,9 @@ private:
 
 private:
   /**
-   * Match the features of the images.
+   * Match the features of the images using Brute-Force Matcher
+   * or Flann based Matcher. The matches are filtered using the ratio test.
+   * The good matches are returned.
    * @param src_features The source image features.
    * @param dst_features The destination image features.
    * @return The matched features.
@@ -143,7 +168,8 @@ private:
 
 private:
   /**
-   * Draw the matches between the images.
+   * Draw the matches between the images. The matches are visualized using
+   * drawMatches. The matched features are displayed.
    * @param src_img The source image.
    * @param src_features The source image features.
    * @param dst_img The destination image.
