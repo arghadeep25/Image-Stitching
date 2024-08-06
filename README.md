@@ -2,14 +2,15 @@
 
 ### Description:
 
-#### Input Images 
+#### Input Images
 <p align="center">
-  <img src="data/berlin/001.jpg" width="100"> 
-  <img src="data/berlin/002.jpg" width="100">  
-  <img src="data/berlin/003.jpg" width="100"> 
-  <img src="data/berlin/004.jpg" width="100">  
-  <img src="data/berlin/005.jpg" width="100"> 
-  <img src="data/berlin/006.jpg" width="100">  
+  
+  <img src="data/berlin/001.jpg" style="width:200px;"> 
+  <img src="data/berlin/002.jpg" style="width:200px;">  
+  <img src="data/berlin/003.jpg" style="width:200px;"> 
+  <img src="data/berlin/004.jpg" style="width:200px;">  
+  <img src="data/berlin/005.jpg" style="width:200px;"> 
+  <img src="data/berlin/006.jpg" style="width:200px;">  
 </p> 
 
 #### Output Image
