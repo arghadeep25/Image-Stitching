@@ -2,37 +2,52 @@
 
 ### Description:
 
+#### Input Images 
+<p align="center">
+  <img src="data/berlin/001.jpg" width="100"> 
+  <img src="data/berlin/002.jpg" width="100">  
+  <img src="data/berlin/003.jpg" width="100"> 
+  <img src="data/berlin/004.jpg" width="100">  
+  <img src="data/berlin/005.jpg" width="100"> 
+  <img src="data/berlin/006.jpg" width="100">  
+</p> 
+
+#### Output Image
+
+
 ### Algorithm:
+
 - #### Feature Extraction
     - Detect features from all the images.
     - Compute descriptors for each keypoint
-  
+
 - #### Feature Matching
     - Match features between all the images using a k-d tree to find the k-nearest neighbors in feature space.
     - Use a distance metric to determine the similarity between two descriptors.
     - Use a ratio test to determine the best matches.
-  
+
 - #### Image Matching
     - Use RANSAC to estimate the homography between two images.
     - Use the homography to warp the images.
     - Blend the images together.
     - Probabilistic Model
-  
+
 - #### Panorama Recognition
     - Connected Components
-  
+
 - #### Image Alignment
     - Homography Estimation
     - RANSAC
     - Image Warping
     - Image Blending
-  
+
 - #### Rendering
     - Automatic Straightening
     - Gain Compensation
     - Multi-band Blending
-  
+
 ### Psuedo Code:
+
 ```c++
 // Pseudo-code outline for the image stitching algorithm
 
@@ -82,9 +97,11 @@ for (Panorama& pano : panoramas) {
 
 ### Diagram
 
-### Paper: 
+### Paper:
+
 [Automatic Panoramic Image Stitching using Invariant Features](https://www.cs.ubc.ca/~lowe/papers/07brown.pdf)
 
 ### Other Links:
+
 - [OpenCV Image Stitching Description](https://docs.opencv.org/3.4/d1/d46/group__stitching.html)
 - [PyImageSearch](https://pyimagesearch.com/2018/12/17/image-stitching-with-opencv-and-python/)
