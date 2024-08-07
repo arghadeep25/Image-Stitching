@@ -38,12 +38,6 @@ class ImageBlending {
     cv::Size src_img_size = src_img.size();
     cv::Size dst_img_size = dst_img.size();
 
-    std::cout << "src_img type: " << src_img.type() << std::endl;
-    std::cout << "src_img pixel warp_images value: "
-              << src_img.at<cv::Vec3b>(500, 500) << std::endl;
-    std::cout << "dst_img pixel warp_images value: "
-              << dst_img.at<cv::Vec3b>(500, 500) << std::endl;
-
     // Compute the homography matrix
     is::features::Features features;
     cv::Mat homography = features.compute_homography(src_img, dst_img);
@@ -57,8 +51,6 @@ class ImageBlending {
                     static_cast<float>(src_img_size.height)),
         cv::Point2f(static_cast<float>(src_img_size.width), 0)};
 
-    std::cout << "src_corners: " << src_corners << std::endl;
-
     // Extract the corners of the destination image
     std::vector<cv::Point2f> dst_corners = {
         cv::Point2f(0, 0),
@@ -66,8 +58,6 @@ class ImageBlending {
         cv::Point2f(static_cast<float>(dst_img_size.width),
                     static_cast<float>(dst_img_size.height)),
         cv::Point2f(static_cast<float>(dst_img_size.width), 0)};
-
-    std::cout << "dst_corners: " << dst_corners << std::endl;
 
     // Apply perspective transformation to the source image based on the
     // homography matrix
@@ -85,12 +75,8 @@ class ImageBlending {
     min_point = min_max_coords.first;
     max_point = min_max_coords.second;
 
-    std::cout << "min_point: " << min_point << std::endl;
-    std::cout << "max_point: " << max_point << std::endl;
-
     // Translation Coordinates
     cv::Point2f translation{-min_point.x, -min_point.y};
-    std::cout << "Translation: " << translation << std::endl;
     std::string side;
 
     // Estimate the size of the panorama image
@@ -103,9 +89,6 @@ class ImageBlending {
       width_pano = static_cast<int>(src_warped_corners[3].x);
       side = "right";
     }
-
-    std::cout << "height_pano: " << height_pano << " width_pano: " << width_pano << std::endl;
-    std::cout << "side: " << side << std::endl;
 
     // Translation Matrix
     cv::Mat Ht = cv::Mat::eye(3, 3, homography.type());
@@ -120,45 +103,28 @@ class ImageBlending {
     // Resize the destination image
     cv::Mat dst_img_rz =
         cv::Mat::zeros(cv::Size(width_pano, height_pano), dst_img.type());
-    if (side == "left") {
-      auto roi = cv::Rect(static_cast<int>(translation.x),
-                          static_cast<int>(translation.y), dst_img_size.width,
-                          src_img_size.height);
-      std::cout << "left roi: " << translation.y << " " << src_img_size.height + translation.y << " " << translation.x
-                << " " << dst_img_size.width + translation.x << std::endl;
-      std::cout << "dst_img pixel inside if value: "
-                << dst_img.at<cv::Vec3b>(500, 500) << std::endl;
-      std::cout << "dst_img_size: " << dst_img_size << std::endl;
-      dst_img.copyTo(dst_img_rz(roi));
-    } else {
-      auto roi = cv::Rect(0, static_cast<int>(translation.y), dst_img_size.width,
-                          src_img_size.height);
-      std::cout << "right roi: " << roi << std::endl;
-      dst_img.copyTo(dst_img_rz(roi));
-    }
 
-    std::cout << "dst_img_rz pixel warp_images value: "
-              << dst_img_rz.at<cv::Vec3b>(500, 500) << std::endl;
-    std::cout << "src_img_warped pixel warp_images value: "
-              << src_img_warped.at<cv::Vec3b>(500, 500) << std::endl;
-    std::cout << "dst_img_width: " << dst_img_size.width << std::endl;
+    auto roi = cv::Rect(0, static_cast<int>(translation.y), dst_img_size.width, src_img_size.height);
+    side == "left" ? roi.x = static_cast<int>(translation.x) : roi.x = 0;
+
+    dst_img.copyTo(dst_img_rz(roi));
 
     // Panorama Blending
     auto [pano, nonblend, leftside, rightside] = this->panoramaBlending(
         dst_img_rz, src_img_warped, dst_img_size.width, side, false);
 
-    pano = crop(pano, dst_img_size.height, dst_corners_warped);
     is::vis::display(pano, "Pano Image");
+    pano = crop(pano, dst_img_size.height, dst_corners_warped);
     //    test(dst_img_rz, src_img_warped, dst_width, side, true);
-    is::vis::display(src_img_warped, "Warped Image");
+//    is::vis::display(src_img_warped,                     "Warped Image");
   }
 
  private:
-  /**
-   * @brief Extract the min and max points from the given points.
-   * @param points The points to extract min and max points from.
-   * @return The min and max points.
-   */
+/**
+ * @brief Extract the min and max points from the given points.
+ * @param points The points to extract min and max points from.
+ * @return The min and max points.
+ */
   std::pair<cv::Point2f, cv::Point2f>
   min_max_points(const std::vector<cv::Point2f> &points) {
     cv::Point2f min_point, max_point;
@@ -181,20 +147,19 @@ class ImageBlending {
   }
 
  private:
-  /**
-   * @brief Blending mask for the given image.
-   * @param height The height of the image.
-   * @param width The width of the image.
-   * @param barrier The barrier for the mask.
-   * @param smoothing_window The smoothing window for the mask.
-   * @param left_biased The bias for the mask.
-   * @return The blended mask.
-   */
+/**
+ * @brief Blending mask for the given image.
+ * @param height The height of the image.
+ * @param width The width of the image.
+ * @param barrier The barrier for the mask.
+ * @param smoothing_window The smoothing window for the mask.
+ * @param left_biased The bias for the mask.
+ * @return The blended mask.
+ */
   cv::Mat blend_mask(const int &height, const int &width, const int &barrier,
                      const int &smoothing_window, bool left_biased) {
     assert(barrier < width);
     cv::Mat mask = cv::Mat::zeros(height, width, CV_32F);
-    std::cout << "mask type: " << mask.type() << std::endl;
     int offset = smoothing_window / 2;
     try {
       if (left_biased) {
@@ -233,64 +198,52 @@ class ImageBlending {
         mask.colRange(barrier + offset, width).setTo(1);
       }
     }
-
     cv::Mat mask_3channel;
     std::vector<cv::Mat> channels = {mask, mask, mask};
     merge(channels, mask_3channel);
+//    is::vis::display(mask_3channel, "Mask Image");
     mask_3channel.convertTo(mask_3channel, CV_8U);
     cv::normalize(mask_3channel, mask_3channel, 0, 1, cv::NORM_MINMAX);
     return mask_3channel;
   }
 
  private:
-  /**
-   * @brief Panorama blending for the given images.
-   * @param dst_img_rz The destination image.
-   * @param src_img_warped The source image.
-   * @param width_dst The width of the destination image.
-   * @param side The side of the image.
-   * @param showstep The flag to show the steps.
-   * @return The blended images.
-   */
+/**
+ * @brief Panorama blending for the given images.
+ * @param dst_img_rz The destination image.
+ * @param src_img_warped The source image.
+ * @param width_dst The width of the destination image.
+ * @param side The side of the image.
+ * @param showstep The flag to show the steps.
+ * @return The blended images.
+ */
   std::tuple<cv::Mat, cv::Mat, cv::Mat, cv::Mat>
   panoramaBlending(const cv::Mat &dst_img_rz, const cv::Mat &src_img_warped,
-                   int width_dst, const std::string &side,
+                   const int &width_dst, const std::string &side,
                    bool showstep = false) {
-    int h = dst_img_rz.rows;
-    int w = dst_img_rz.cols;
+    cv::Size dst_img_size = dst_img_rz.size();
     int smoothing_window = width_dst / 8;
     int barrier = width_dst - smoothing_window / 2;
 
     // Generate masks with CV_32F type
-    cv::Mat mask1 = blend_mask(h, w, barrier, smoothing_window, true);
-    cv::Mat mask2 = blend_mask(h, w, barrier, smoothing_window, false);
-
-    std::cout << "mask1 type: " << mask1.type() << std::endl;
-    std::cout << "mask2 type: " << mask2.type() << std::endl;
+    cv::Mat mask1 = blend_mask(dst_img_size.height, dst_img_size.width, barrier, smoothing_window, true);
+    cv::Mat mask2 = blend_mask(dst_img_size.height, dst_img_size.width, barrier, smoothing_window, false);
+    std::cout << "mask1 pixel val: " << mask1.at<cv::Vec3b>(500, 500) << std::endl;
+    std::cout << "mask2 pixel val: " << mask2.at<cv::Vec3b>(500, 500) << std::endl;
 
     // Convert images to CV_32F for consistent operations
     cv::Mat dst_img_rz_copy = dst_img_rz.clone();
     cv::Mat src_img_warped_copy = src_img_warped.clone();
 
-    dst_img_rz.convertTo(dst_img_rz_copy, CV_32F);
-
-    std::cout << "dst_img_rz_copy Pixel panoramaBlending value: "
-              << dst_img_rz_copy.at<cv::Vec3b>(500, 500) << std::endl;
-    std::cout << "src_img_warped_copy Pixel panoramaBlending value: "
-              << src_img_warped_copy.at<cv::Vec3b>(500, 500) << std::endl;
-
-    src_img_warped.convertTo(src_img_warped_copy, CV_32F);
-
-    std::cout << "dst_img_rz_copy type: " << dst_img_rz_copy.type()
-              << std::endl;
-    std::cout << "src_img_warped_copy type: " << src_img_warped_copy.type()
-              << std::endl;
-
     cv::Mat nonblend, leftside, rightside;
 
+    if (showstep) {
+      nonblend = dst_img_rz_copy + src_img_warped_copy;
+    }
+
     // Ensure masks are of type CV_32F
-    mask1.convertTo(mask1, CV_32F);
-    mask2.convertTo(mask2, CV_32F);
+//    mask1.convertTo(mask1, CV_32F);
+//    mask2.convertTo(mask2, CV_32F);
 
     std::cout << "mask1 type after conversion: " << mask1.type() << std::endl;
     std::cout << "mask2 type after conversion: " << mask2.type() << std::endl;
@@ -301,11 +254,10 @@ class ImageBlending {
       cv::flip(src_img_warped_copy, src_img_warped_copy, 1);
 
       dst_img_rz_copy = dst_img_rz_copy.mul(mask1);
-      std::cout << "dst_img_rz_copy Pixel value: "
-                << dst_img_rz_copy.at<cv::Vec3b>(500, 500) << std::endl;
+//       TODO fix the error
+//      cv::multiply(mask1, dst_img_rz_copy, dst_img_rz_copy);
+      is::vis::display(dst_img_rz_copy, "Dst Image");
       src_img_warped_copy = src_img_warped_copy.mul(mask2);
-      std::cout << "src_img_warped_copy Pixel value: "
-                << src_img_warped_copy.at<cv::Vec3b>(500, 500) << std::endl;
 
       cv::Mat pano = src_img_warped_copy + dst_img_rz_copy;
       cv::flip(pano, pano, 1);
@@ -316,8 +268,8 @@ class ImageBlending {
         cv::flip(rightside, rightside, 1);
       }
       // Normalize and convert to CV_8U
-      cv::normalize(pano, pano, 0, 255, cv::NORM_MINMAX);
-      pano.convertTo(pano, CV_8U);
+//      cv::normalize(pano, pano, 0, 255, cv::NORM_MINMAX);
+//      pano.convertTo(pano, CV_8U);
 
       return {pano, nonblend, leftside, rightside};
     } else {
@@ -337,13 +289,13 @@ class ImageBlending {
   }
 
  private:
-  /**
-   * @brief Crop the panorama image.
-   * @param panorama The panorama image.
-   * @param height The height of the panorama.
-   * @param corners The corners of the panorama.
-   * @return The cropped panorama.
-   */
+/**
+ * @brief Crop the panorama image.
+ * @param panorama The panorama image.
+ * @param height The height of the panorama.
+ * @param corners The corners of the panorama.
+ * @return The cropped panorama.
+ */
   cv::Mat crop(const cv::Mat &panorama, const int &height,
                const std::vector<cv::Point2f> &corners) {
     cv::Point2f min_point, max_point;
