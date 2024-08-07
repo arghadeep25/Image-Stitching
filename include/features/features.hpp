@@ -38,13 +38,13 @@ class Features {
     double confidence = 0.995;
   };
 
-public:
+ public:
   Features() = default;
 
-public:
+ public:
   ~Features() = default;
 
-public:
+ public:
   /**
    * @brief Compute the homography matrix using RANSAC. First the features
    * are extracted from the images using SIFT descriptor. Then the features
@@ -57,7 +57,7 @@ public:
    * @param dst_img The destination image.
    * @return The homography matrix.
    */
-  cv::Mat compute_homography(const cv::Mat &src_img, const cv::Mat &dst_img) {
+  types::Image compute_homography(const types::Image &src_img, const types::Image &dst_img) {
     if (src_img.empty() || dst_img.empty())
       throw std::runtime_error("Image is empty");
 
@@ -67,10 +67,10 @@ public:
     if (src_features.keypoints.empty() || dst_features.keypoints.empty())
       throw std::runtime_error("Keypoints are empty");
 
-    std::vector<cv::DMatch> matches =
+    types::MatchedFeatures matches =
         match_features(src_features.descriptors, dst_features.descriptors);
 
-    std::vector<cv::Point2f> points1, points2;
+    types::Points points1, points2;
     for (auto match : matches) {
       points1.push_back(src_features.keypoints[match.queryIdx].pt);
       points2.push_back(dst_features.keypoints[match.trainIdx].pt);
@@ -88,11 +88,10 @@ public:
         points1, points2, cv::RANSAC, params.rejection_threshold, inliers_mask,
         params.max_iterations, params.confidence);
 
-    std::cout << "Homography Matrix: \n" << homography << std::endl;
     return homography;
   }
 
-private:
+ private:
   /**
    * @brief Extract features from the image using SIFT descriptor. The
    * keypoints and descriptors are returned. If the image is colored, it is
@@ -105,8 +104,8 @@ private:
    * @param img source image from which the features will be extracted.
    * @return extracted image features.
    */
-  types::ImageFeature extract_features(const cv::Mat &img) {
-    cv::Mat img_clone = img.clone();
+  types::ImageFeature extract_features(const types::Image &img) {
+    types::Image img_clone = img.clone();
 
     if (img.empty())
       throw std::runtime_error("Image is empty");
@@ -114,8 +113,8 @@ private:
     if (img.channels() != 1)
       cv::cvtColor(img, img_clone, cv::COLOR_BGR2GRAY);
 
-    std::vector<cv::KeyPoint> keypoints;
-    cv::Mat descriptors;
+    types::Keypoints keypoints;
+    types::Image descriptors;
 
     cv::Ptr<cv::Feature2D> sift = cv::SIFT::create();
     sift->detectAndCompute(img_clone, cv::noArray(), keypoints, descriptors);
@@ -126,7 +125,7 @@ private:
     return {keypoints, descriptors};
   }
 
-private:
+ private:
   /**
    * Match the features of the images using Brute-Force Matcher
    * or Flann based Matcher. The matches are filtered using the ratio test.
@@ -135,12 +134,12 @@ private:
    * @param dst_features The destination image features.
    * @return The matched features.
    */
-  std::vector<cv::DMatch> match_features(const cv::Mat &src_features,
-                                         const cv::Mat &dst_features) {
+  types::MatchedFeatures match_features(const types::Image &src_features,
+                                        const types::Image &dst_features) {
     if (src_features.empty() || dst_features.empty())
       throw std::runtime_error("Features are empty");
 
-    std::vector<std::vector<cv::DMatch>> matches;
+    std::vector<types::MatchedFeatures> matches;
 
     if (params.matcher_type == "BFMatcher") {
       cv::BFMatcher matcher(cv::NORM_L2, true);
@@ -155,7 +154,7 @@ private:
     if (matches.empty())
       throw std::runtime_error("Matches are empty");
 
-    std::vector<cv::DMatch> good_matches;
+    types::MatchedFeatures good_matches;
     for (auto &match : matches)
       if (match[0].distance < 0.75 * match[1].distance)
         good_matches.push_back(match[0]);
@@ -166,7 +165,7 @@ private:
     return good_matches;
   }
 
-private:
+ private:
   /**
    * Draw the matches between the images. The matches are visualized using
    * drawMatches. The matched features are displayed.
@@ -176,17 +175,18 @@ private:
    * @param dst_features The destination image features.
    * @param matches The matched features.
    */
-  void draw_matches(const cv::Mat &src_img,
+  void draw_matches(const types::Image &src_img,
                     const types::ImageFeature &src_features,
-                    const cv::Mat &dst_img,
+                    const types::Image &dst_img,
                     const types::ImageFeature &dst_features,
-                    const std::vector<cv::DMatch> &matches) {
+                    const types::MatchedFeatures &matches) {
     if (src_img.empty() || dst_img.empty())
       throw std::runtime_error("Image is empty for visualization");
+
     if (src_features.keypoints.empty() || dst_features.keypoints.empty())
       throw std::runtime_error("Keypoints are empty for visualization");
 
-    cv::Mat img_matches;
+    types::Image img_matches;
 
     cv::drawMatches(src_img, src_features.keypoints, dst_img,
                     dst_features.keypoints, matches, img_matches);
@@ -194,7 +194,7 @@ private:
     cv::waitKey(0);
   }
 
-public:
+ public:
   FeaturesParameters params;
 };
 } // namespace is::features
