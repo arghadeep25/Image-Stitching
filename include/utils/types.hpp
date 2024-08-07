@@ -13,6 +13,15 @@ namespace is::types {
 
 using Image = cv::Mat;
 
+using MatchedFeatures = std::vector<cv::DMatch>;
+
+using Point = cv::Point2f;
+
+using Points = std::vector<Point>;
+
+using Keypoint = cv::KeyPoint;
+using Keypoints = std::vector<Keypoint>;
+
 /**
  * To define the image feature.
  */
