@@ -8,12 +8,19 @@
 #include <utils/image_visualizer.hpp>
 #include <utils/scoped_timer.hpp>
 #include <utils/types.hpp>
-#include <featues/features.hpp>
+#include <features/features.hpp>
 
 int main() {
   std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
   auto image1 = is::utils::read_image("../data/001.jpg");
   auto image2 = is::utils::read_image("../data/002.jpg");
+
+//  cv::Mat new_image = cv::Mat::zeros(image1.size(), image1.type());
+//  auto roi = cv::Rect(0, 0, 400, 400);
+//  image1(roi).copyTo(new_image(roi));
+//  std::cout << "new_image pixel value: " << new_image.at<cv::Vec3b>(100, 100) << std::endl;
+//  is::vis::display(new_image, "New Image");
+
 //  is::features::Features feature;
 //  feature.params.rejection_threshold = 3.0;
 //  auto homography = feature.compute_homography(image1, image2);
