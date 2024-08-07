@@ -12,7 +12,7 @@
 #include <iostream>
 #include <vector>
 
-#include <featues/features.hpp>
+#include <features/features.hpp>
 #include <opencv2/opencv.hpp>
 #include <utils/image_visualizer.hpp>
 #include <utils/types.hpp>
@@ -22,13 +22,13 @@ namespace is::blend {
  * Image blending class
  */
 class ImageBlending {
-public:
+ public:
   ImageBlending() = default;
 
-public:
+ public:
   ~ImageBlending() = default;
 
-public:
+ public:
   void warp_images(const cv::Mat &src_img, const cv::Mat &dst_img) {
     if (src_img.empty() || dst_img.empty()) {
       std::cerr << "Images are empty." << std::endl;
@@ -47,6 +47,7 @@ public:
     // Compute the homography matrix
     is::features::Features features;
     cv::Mat homography = features.compute_homography(src_img, dst_img);
+    std::cout << "Homography Matrix: \n" << homography << std::endl;
 
     // Extract the corners of the source image
     std::vector<cv::Point2f> src_corners = {
@@ -56,13 +57,17 @@ public:
                     static_cast<float>(src_img_size.height)),
         cv::Point2f(static_cast<float>(src_img_size.width), 0)};
 
+    std::cout << "src_corners: " << src_corners << std::endl;
+
     // Extract the corners of the destination image
     std::vector<cv::Point2f> dst_corners = {
         cv::Point2f(0, 0),
         cv::Point2f(0, static_cast<float>(dst_img_size.height)),
         cv::Point2f(static_cast<float>(dst_img_size.width),
                     static_cast<float>(dst_img_size.height)),
-        cv::Point2f(static_cast<float>(dst_img_size.height), 0)};
+        cv::Point2f(static_cast<float>(dst_img_size.width), 0)};
+
+    std::cout << "dst_corners: " << dst_corners << std::endl;
 
     // Apply perspective transformation to the source image based on the
     // homography matrix
@@ -80,12 +85,16 @@ public:
     min_point = min_max_coords.first;
     max_point = min_max_coords.second;
 
+    std::cout << "min_point: " << min_point << std::endl;
+    std::cout << "max_point: " << max_point << std::endl;
+
     // Translation Coordinates
     cv::Point2f translation{-min_point.x, -min_point.y};
+    std::cout << "Translation: " << translation << std::endl;
     std::string side;
 
     // Estimate the size of the panorama image
-    int width_pano, height_pano = static_cast<int>(max_point.y - min_point.x);
+    int width_pano, height_pano = static_cast<int>(max_point.y - min_point.y);
 
     if (dst_corners_warped[0].x < 0) {
       width_pano = dst_img_size.width + static_cast<int>(translation.x);
@@ -94,6 +103,9 @@ public:
       width_pano = static_cast<int>(src_warped_corners[3].x);
       side = "right";
     }
+
+    std::cout << "height_pano: " << height_pano << " width_pano: " << width_pano << std::endl;
+    std::cout << "side: " << side << std::endl;
 
     // Translation Matrix
     cv::Mat Ht = cv::Mat::eye(3, 3, homography.type());
@@ -109,22 +121,31 @@ public:
     cv::Mat dst_img_rz =
         cv::Mat::zeros(cv::Size(width_pano, height_pano), dst_img.type());
     if (side == "left") {
-      dst_img_rz(cv::Rect(static_cast<int>(translation.x),
+      auto roi = cv::Rect(static_cast<int>(translation.x),
                           static_cast<int>(translation.y), dst_img_size.width,
-                          src_img_size.height)) = dst_img;
+                          src_img_size.height);
+      std::cout << "left roi: " << translation.y << " " << src_img_size.height + translation.y << " " << translation.x
+                << " " << dst_img_size.width + translation.x << std::endl;
+      std::cout << "dst_img pixel inside if value: "
+                << dst_img.at<cv::Vec3b>(500, 500) << std::endl;
+      std::cout << "dst_img_size: " << dst_img_size << std::endl;
+      dst_img.copyTo(dst_img_rz(roi));
     } else {
-      dst_img_rz(cv::Rect(static_cast<int>(translation.y), 0,
-                          dst_img_size.width, src_img_size.height)) = dst_img;
+      auto roi = cv::Rect(0, static_cast<int>(translation.y), dst_img_size.width,
+                          src_img_size.height);
+      std::cout << "right roi: " << roi << std::endl;
+      dst_img.copyTo(dst_img_rz(roi));
     }
 
     std::cout << "dst_img_rz pixel warp_images value: "
               << dst_img_rz.at<cv::Vec3b>(500, 500) << std::endl;
     std::cout << "src_img_warped pixel warp_images value: "
               << src_img_warped.at<cv::Vec3b>(500, 500) << std::endl;
+    std::cout << "dst_img_width: " << dst_img_size.width << std::endl;
 
     // Panorama Blending
     auto [pano, nonblend, leftside, rightside] = this->panoramaBlending(
-        dst_img_rz, src_img_warped, dst_img_size.width, side, true);
+        dst_img_rz, src_img_warped, dst_img_size.width, side, false);
 
     pano = crop(pano, dst_img_size.height, dst_corners_warped);
     is::vis::display(pano, "Pano Image");
@@ -132,7 +153,7 @@ public:
     is::vis::display(src_img_warped, "Warped Image");
   }
 
-private:
+ private:
   /**
    * @brief Extract the min and max points from the given points.
    * @param points The points to extract min and max points from.
@@ -159,7 +180,7 @@ private:
     return {min_point, max_point};
   }
 
-private:
+ private:
   /**
    * @brief Blending mask for the given image.
    * @param height The height of the image.
@@ -180,7 +201,7 @@ private:
         for (int i = 0; i < height; ++i) {
           for (int j = barrier - offset; j <= barrier + offset; ++j) {
             mask.at<float>(i, j) =
-                1 - (float)(j - (barrier - offset)) / (2 * offset + 1);
+                1 - (float) (j - (barrier - offset)) / (2 * offset + 1);
           }
         }
         mask.colRange(0, barrier - offset).setTo(1);
@@ -188,7 +209,7 @@ private:
         for (int i = 0; i < height; ++i) {
           for (int j = barrier - offset; j <= barrier + offset; ++j) {
             mask.at<float>(i, j) =
-                (float)(j - (barrier - offset)) / (2 * offset + 1);
+                (float) (j - (barrier - offset)) / (2 * offset + 1);
           }
         }
         mask.colRange(barrier + offset, width).setTo(1);
@@ -198,7 +219,7 @@ private:
         for (int i = 0; i < height; ++i) {
           for (int j = barrier - offset; j < barrier + offset; ++j) {
             mask.at<float>(i, j) =
-                1 - (float)(j - (barrier - offset)) / (2 * offset);
+                1 - (float) (j - (barrier - offset)) / (2 * offset);
           }
         }
         mask.colRange(0, barrier - offset).setTo(1);
@@ -206,7 +227,7 @@ private:
         for (int i = 0; i < height; ++i) {
           for (int j = barrier - offset; j < barrier + offset; ++j) {
             mask.at<float>(i, j) =
-                (float)(j - (barrier - offset)) / (2 * offset);
+                (float) (j - (barrier - offset)) / (2 * offset);
           }
         }
         mask.colRange(barrier + offset, width).setTo(1);
@@ -221,7 +242,7 @@ private:
     return mask_3channel;
   }
 
-private:
+ private:
   /**
    * @brief Panorama blending for the given images.
    * @param dst_img_rz The destination image.
@@ -315,7 +336,7 @@ private:
     }
   }
 
-private:
+ private:
   /**
    * @brief Crop the panorama image.
    * @param panorama The panorama image.
@@ -339,7 +360,7 @@ private:
       cropped_panorama = panorama(roi);
     } else {
       cv::Rect roi(0, static_cast<int>(translation.y),
-                   (int)std::min(corners[2].x, corners[3].x), height);
+                   (int) std::min(corners[2].x, corners[3].x), height);
       cropped_panorama = panorama(roi);
     }
     return cropped_panorama;
