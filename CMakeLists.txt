@@ -3,6 +3,8 @@ project(image_stitching VERSION 0.1 DESCRIPTION "Image Stitching" LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
+add_definitions(-DPROJECT_SOURCE_DIR=\"${CMAKE_SOURCE_DIR}\")
+
 # Set build type to Release if not specified
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
