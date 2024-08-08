@@ -40,7 +40,7 @@ public:
     // Compute the homography matrix
     is::features::Features features;
     cv::Mat homography = features.compute_homography(src_img, dst_img);
-    std::cout << "Homography Matrix: \n" << homography << std::endl;
+    //    std::cout << "Homography Matrix: \n" << homography << std::endl;
 
     auto [src_warped_corners, dst_corners_warped] =
         this->perspective_transform(src_img_size, dst_img_size, homography);
@@ -60,7 +60,7 @@ public:
     panorama_size.width =
         left_biased ? dst_img_size.width + static_cast<int>(translation.x)
                     : static_cast<int>(src_warped_corners[3].x);
-    
+
     if (dst_corners_warped[0].x < 0) {
       panorama_size.width =
           dst_img_size.width + static_cast<int>(translation.x);
@@ -85,18 +85,28 @@ public:
 
     auto roi = cv::Rect(0, static_cast<int>(translation.y), dst_img_size.width,
                         src_img_size.height);
+
     side == "left" ? roi.x = static_cast<int>(translation.x) : roi.x = 0;
+
+    left_biased ? roi.x = static_cast<int>(translation.x) : roi.x = 0;
 
     dst_img.copyTo(dst_img_rz(roi));
 
     // Panorama Blending
     auto pano = this->panoramaBlending(dst_img_rz, src_img_warped,
-                                       dst_img_size.width, side, false);
+                                       dst_img_size.width, left_biased, false);
     pano = crop(pano, dst_img_size.height, dst_corners_warped);
     return pano;
   }
 
 private:
+  /**
+   * @brief Perspective transformation for the given images.
+   * @param src_img_size The size of the source image.
+   * @param dst_img_size The size of the destination image.
+   * @param homography The homography matrix.
+   * @return The perspective transformed image corners.
+   */
   std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>>
   perspective_transform(const cv::Size &src_img_size,
                         const cv::Size &dst_img_size,
@@ -231,7 +241,7 @@ private:
    */
   cv::Mat panoramaBlending(const cv::Mat &dst_img_rz,
                            const cv::Mat &src_img_warped, const int &width_dst,
-                           const std::string &side, bool showstep = false) {
+                           const bool &left_biased, bool showstep = false) {
     cv::Size dst_img_size = dst_img_rz.size();
     int smoothing_window = width_dst / 8;
     int barrier = width_dst - smoothing_window / 2;
@@ -256,7 +266,7 @@ private:
     }
 
     // Blending process
-    if (side == "left") {
+    if (left_biased) {
       cv::flip(dst_img_rz_copy, dst_img_rz_copy, 1);
       cv::flip(src_img_warped_copy, src_img_warped_copy, 1);
 
