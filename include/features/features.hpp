@@ -21,13 +21,13 @@ namespace is::features {
  * features are extracted using SIFT descriptor. The features are matched using
  * Brute-Force Matcher or Flann based Matcher. The homography matrix is computed
  * using RANSAC. The inliers are visualized if the visualization flag is set to
- * true. The homography matrix is returned. The homography matrix is used to warp
- * the images to align them before blending.
- * @details The keypoints are the points of interest in the image. The descriptors
- * are the feature vectors that describe the keypoints. The descriptors are used
- * to match the features between the images. The keypoints are visualized using
- * drawKeypoints. The matches are visualized using drawMatches. The matched features
- * are displayed.
+ * true. The homography matrix is returned. The homography matrix is used to
+ * warp the images to align them before blending.
+ * @details The keypoints are the points of interest in the image. The
+ * descriptors are the feature vectors that describe the keypoints. The
+ * descriptors are used to match the features between the images. The keypoints
+ * are visualized using drawKeypoints. The matches are visualized using
+ * drawMatches. The matched features are displayed.
  */
 class Features {
   struct FeaturesParameters {
@@ -38,28 +38,30 @@ class Features {
     double confidence = 0.995;
   };
 
- public:
+public:
   Features() = default;
 
- public:
+public:
   ~Features() = default;
 
- public:
+public:
   /**
    * @brief Compute the homography matrix using RANSAC. First the features
    * are extracted from the images using SIFT descriptor. Then the features
    * are matched using Brute-Force Matcher or Flann based Matcher. Finally,
    * the homography matrix is computed using RANSAC. The inliers are visualized
-   * if the visualization flag is set to true. The homography matrix is returned.
+   * if the visualization flag is set to true. The homography matrix is
+   * returned.
    * @details The homography matrix is used to warp the images to align them
    * before blending.
    * @param src_img The source image.
    * @param dst_img The destination image.
    * @return The homography matrix.
    */
-  types::Image compute_homography(const types::Image &src_img, const types::Image &dst_img) {
+  types::Image compute_homography(const types::Image &src_img,
+                                  const types::Image &dst_img) {
     if (src_img.empty() || dst_img.empty())
-      throw std::runtime_error("Image is empty");
+      throw std::runtime_error("Features::compute_homography Image is empty");
 
     types::ImageFeature src_features = extract_features(src_img);
     types::ImageFeature dst_features = extract_features(dst_img);
@@ -91,7 +93,7 @@ class Features {
     return homography;
   }
 
- private:
+private:
   /**
    * @brief Extract features from the image using SIFT descriptor. The
    * keypoints and descriptors are returned. If the image is colored, it is
@@ -125,7 +127,7 @@ class Features {
     return {keypoints, descriptors};
   }
 
- private:
+private:
   /**
    * Match the features of the images using Brute-Force Matcher
    * or Flann based Matcher. The matches are filtered using the ratio test.
@@ -165,7 +167,7 @@ class Features {
     return good_matches;
   }
 
- private:
+private:
   /**
    * Draw the matches between the images. The matches are visualized using
    * drawMatches. The matched features are displayed.
@@ -194,7 +196,7 @@ class Features {
     cv::waitKey(0);
   }
 
- public:
+public:
   FeaturesParameters params;
 };
 } // namespace is::features
