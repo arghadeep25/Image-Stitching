@@ -29,11 +29,10 @@ public:
   ~ImageBlending() = default;
 
 public:
-  void warp_images(const cv::Mat &src_img, const cv::Mat &dst_img) {
-    if (src_img.empty() || dst_img.empty()) {
-      std::cerr << "Images are empty." << std::endl;
-      return;
-    }
+  cv::Mat warp_images(const cv::Mat &src_img, const cv::Mat &dst_img) {
+    if (src_img.empty() || dst_img.empty())
+      throw std::runtime_error("Image is empty");
+
     // Size of the source and destination image
     cv::Size src_img_size = src_img.size();
     cv::Size dst_img_size = dst_img.size();
@@ -43,6 +42,65 @@ public:
     cv::Mat homography = features.compute_homography(src_img, dst_img);
     std::cout << "Homography Matrix: \n" << homography << std::endl;
 
+    auto [src_warped_corners, dst_corners_warped] =
+        this->perspective_transform(src_img_size, dst_img_size, homography);
+
+    // Extracting Min and Max points from the merged warped corners
+    auto [min_point, max_point] = this->min_max_points(dst_corners_warped);
+
+    // Translation Coordinates
+    cv::Point2f translation{-min_point.x, -min_point.y};
+    bool left_biased = dst_corners_warped[0].x < 0;
+    std::string side;
+
+    // Estimate the size of the panorama image
+    cv::Size panorama_size;
+    panorama_size.height = static_cast<int>(max_point.y - min_point.y);
+
+    panorama_size.width =
+        left_biased ? dst_img_size.width + static_cast<int>(translation.x)
+                    : static_cast<int>(src_warped_corners[3].x);
+    
+    if (dst_corners_warped[0].x < 0) {
+      panorama_size.width =
+          dst_img_size.width + static_cast<int>(translation.x);
+      side = "left";
+    } else {
+      panorama_size.width = static_cast<int>(src_warped_corners[3].x);
+      side = "right";
+    }
+
+    // Translation Matrix
+    cv::Mat Ht = cv::Mat::eye(3, 3, homography.type());
+    Ht.at<double>(0, 2) = translation.x;
+    Ht.at<double>(1, 2) = translation.y;
+
+    // Warp the source image
+    cv::Mat src_img_warped;
+    cv::warpPerspective(src_img, src_img_warped, Ht * homography,
+                        panorama_size);
+
+    // Resize the destination image
+    cv::Mat dst_img_rz = cv::Mat::zeros(panorama_size, dst_img.type());
+
+    auto roi = cv::Rect(0, static_cast<int>(translation.y), dst_img_size.width,
+                        src_img_size.height);
+    side == "left" ? roi.x = static_cast<int>(translation.x) : roi.x = 0;
+
+    dst_img.copyTo(dst_img_rz(roi));
+
+    // Panorama Blending
+    auto pano = this->panoramaBlending(dst_img_rz, src_img_warped,
+                                       dst_img_size.width, side, false);
+    pano = crop(pano, dst_img_size.height, dst_corners_warped);
+    return pano;
+  }
+
+private:
+  std::pair<std::vector<cv::Point2f>, std::vector<cv::Point2f>>
+  perspective_transform(const cv::Size &src_img_size,
+                        const cv::Size &dst_img_size,
+                        const cv::Mat &homography) {
     // Extract the corners of the source image
     std::vector<cv::Point2f> src_corners = {
         cv::Point2f(0, 0),
@@ -69,55 +127,7 @@ public:
     dst_corners_warped.insert(dst_corners_warped.end(), dst_corners.begin(),
                               dst_corners.end());
 
-    // Extracting Min and Max points from the merged warped corners
-    cv::Point2f min_point, max_point;
-    auto min_max_coords = this->min_max_points(dst_corners_warped);
-    min_point = min_max_coords.first;
-    max_point = min_max_coords.second;
-
-    // Translation Coordinates
-    cv::Point2f translation{-min_point.x, -min_point.y};
-    std::string side;
-
-    // Estimate the size of the panorama image
-    int width_pano, height_pano = static_cast<int>(max_point.y - min_point.y);
-
-    if (dst_corners_warped[0].x < 0) {
-      width_pano = dst_img_size.width + static_cast<int>(translation.x);
-      side = "left";
-    } else {
-      width_pano = static_cast<int>(src_warped_corners[3].x);
-      side = "right";
-    }
-
-    // Translation Matrix
-    cv::Mat Ht = cv::Mat::eye(3, 3, homography.type());
-    Ht.at<double>(0, 2) = translation.x;
-    Ht.at<double>(1, 2) = translation.y;
-
-    // Warp the source image
-    cv::Mat src_img_warped;
-    cv::warpPerspective(src_img, src_img_warped, Ht * homography,
-                        cv::Size(width_pano, height_pano));
-
-    // Resize the destination image
-    cv::Mat dst_img_rz =
-        cv::Mat::zeros(cv::Size(width_pano, height_pano), dst_img.type());
-
-    auto roi = cv::Rect(0, static_cast<int>(translation.y), dst_img_size.width,
-                        src_img_size.height);
-    side == "left" ? roi.x = static_cast<int>(translation.x) : roi.x = 0;
-
-    dst_img.copyTo(dst_img_rz(roi));
-
-    // Panorama Blending
-    auto [pano, nonblend, leftside, rightside] = this->panoramaBlending(
-        dst_img_rz, src_img_warped, dst_img_size.width, side, false);
-
-    pano = crop(pano, dst_img_size.height, dst_corners_warped);
-    is::vis::display(pano, "Pano Image");
-    //    test(dst_img_rz, src_img_warped, dst_width, side, true);
-    //    is::vis::display(src_img_warped,                     "Warped Image");
+    return {src_warped_corners, dst_corners_warped};
   }
 
 private:
@@ -162,6 +172,7 @@ private:
     assert(barrier < width);
     cv::Mat mask = cv::Mat::zeros(height, width, CV_32F);
     int offset = smoothing_window / 2;
+
     try {
       if (left_biased) {
         for (int i = 0; i < height; ++i) {
@@ -218,10 +229,9 @@ private:
    * @param showstep The flag to show the steps.
    * @return The blended images.
    */
-  std::tuple<cv::Mat, cv::Mat, cv::Mat, cv::Mat>
-  panoramaBlending(const cv::Mat &dst_img_rz, const cv::Mat &src_img_warped,
-                   const int &width_dst, const std::string &side,
-                   bool showstep = false) {
+  cv::Mat panoramaBlending(const cv::Mat &dst_img_rz,
+                           const cv::Mat &src_img_warped, const int &width_dst,
+                           const std::string &side, bool showstep = false) {
     cv::Size dst_img_size = dst_img_rz.size();
     int smoothing_window = width_dst / 8;
     int barrier = width_dst - smoothing_window / 2;
@@ -258,13 +268,14 @@ private:
 
       cv::Mat pano = src_img_warped_copy + dst_img_rz_copy;
       cv::flip(pano, pano, 1);
+
       if (showstep) {
         leftside = src_img_warped_copy.clone();
         rightside = dst_img_rz_copy.clone();
         cv::flip(leftside, leftside, 1);
         cv::flip(rightside, rightside, 1);
       }
-      return {pano, nonblend, leftside, rightside};
+      return pano;
     } else {
       dst_img_rz_copy = dst_img_rz_copy.mul(mask1);
       dst_img_rz_copy.convertTo(dst_img_rz_copy, CV_8U);
@@ -281,7 +292,7 @@ private:
       cv::normalize(pano, pano, 0, 255, cv::NORM_MINMAX);
       pano.convertTo(pano, CV_8U);
 
-      return {pano, nonblend, leftside, rightside};
+      return pano;
     }
   }
 
