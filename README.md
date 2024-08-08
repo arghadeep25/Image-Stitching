@@ -2,22 +2,20 @@
 
 ### Description:
 
-#### Sample Data
+#### Sample Data (Berlin)
 <p align="center">
-  <img src="data/berlin/001.jpg" width="15%" /> 
-  <img src="data/berlin/002.jpg" width="15%" />  
-  <img src="data/berlin/003.jpg" width="15%" />
-  <img src="data/berlin/004.jpg" width="15%">  
-  <img src="data/berlin/005.jpg" width="15%"> 
-  <img src="data/berlin/006.jpg" width="15%">  
+  <img src="data/berlin/001.jpg" width="16%" /> 
+  <img src="data/berlin/002.jpg" width="16%" />  
+  <img src="data/berlin/003.jpg" width="16%" />
+  <img src="data/berlin/004.jpg" width="16%">  
+  <img src="data/berlin/005.jpg" width="16%"> 
+  <img src="data/berlin/006.jpg" width="16%">  
 </p> 
 
 #### Results
 <p align="center">
   <img src="results/berlin.jpg" width="%" />
 </p>
-
-#### Output Image
 
 
 ### Algorithm:
