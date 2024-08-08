@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <utils/types.hpp>
 
 /**
  * Read an image from the given path.
