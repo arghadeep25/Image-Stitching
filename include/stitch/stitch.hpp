@@ -31,10 +31,10 @@ namespace is::stitch {
  * stitched together to create the final panorama.
  */
 class Stitch {
-public:
+ public:
   Stitch() = default;
 
-public:
+ public:
   ~Stitch() {
     if (!this->m_images.empty()) {
       std::cout << "Flushing the system memory" << std::endl;
@@ -42,7 +42,7 @@ public:
     }
   };
 
-public:
+ public:
   /**
    * @brief Load images from the given path and set to the image batch.
    * @todo if images are greater than certain size, automatic resize
@@ -55,7 +55,7 @@ public:
     this->load_images();
   };
 
-public:
+ public:
   /**
    * @brief Stitch the image batch.
    * @return The stitched image.
@@ -65,7 +65,7 @@ public:
     return this->m_stitched_image;
   }
 
-private:
+ private:
   /**
    * @brief Load images from the given path and stored in a batch of images.
    */
@@ -81,11 +81,14 @@ private:
 
     // Collect all image file paths
     for (const auto &entry :
-         std::filesystem::directory_iterator(this->m_path)) {
+        std::filesystem::directory_iterator(this->m_path)) {
       if (entry.is_regular_file() && entry.path().extension() == ".jpg") {
         image_paths.push_back(entry.path().string());
       }
     }
+
+    if (image_paths.empty())
+      throw std::runtime_error("No images found in the directory.");
 
     // Sort paths
     std::sort(image_paths.begin(), image_paths.end());
@@ -98,9 +101,32 @@ private:
       }
       this->m_images.push_back(image);
     }
+
+    if (this->m_images.empty())
+      throw std::runtime_error("No images loaded.");
   }
 
-private:
+ private:
+  /**
+   * @brief Stitch the images.
+   * @details
+   */
+  void stich_image_batch(types::ImageBatch &images) {
+    if (images.empty())
+      throw std::runtime_error("No images to stitch.");
+
+    while (images.size() > 1) {
+      types::Image dst_img = images.back();
+      images.pop_back();
+      types::Image src_img = images.back();
+      images.pop_back();
+      types::Image left_pano = this->m_blending.warp_images(src_img, dst_img);
+      left_pano.convertTo(left_pano, CV_8U);
+      images.push_back(left_pano);
+    }
+  }
+
+ private:
   /**
    * @brief Stitch the images.
    * @details The images are split into two halves. The left images are
@@ -109,6 +135,9 @@ private:
    * panorama.
    */
   void stitch_images() {
+    if (this->m_images.empty())
+      throw std::runtime_error("No images to stitch.");
+
     size_t image_idx_mid = (this->m_images.size() + 1) / 2;
     types::ImageBatch left(this->m_images.begin(),
                            this->m_images.begin() + image_idx_mid);
@@ -119,26 +148,12 @@ private:
     is::blend::ImageBlending blending;
 
     // Stitch left images
-    while (left.size() > 1) {
-      types::Image dst_img = left.back();
-      left.pop_back();
-      types::Image src_img = left.back();
-      left.pop_back();
-      types::Image left_pano = blending.warp_images(src_img, dst_img);
-      left_pano.convertTo(left_pano, CV_8U);
-      left.push_back(left_pano);
-    }
-
+    this->stich_image_batch(left);
     // Stitch right images
-    while (right.size() > 1) {
-      types::Image dst_img = right.back();
-      right.pop_back();
-      types::Image src_img = right.back();
-      right.pop_back();
-      types::Image right_pano = blending.warp_images(src_img, dst_img);
-      right_pano.convertTo(right_pano, CV_8U);
-      right.push_back(right_pano);
-    }
+    this->stich_image_batch(right);
+
+    if (left.empty() || right.empty())
+      throw std::runtime_error("No images to stitch.");
 
     // Final stitch of left and right panoramas
     types::Image final_pano;
@@ -150,11 +165,12 @@ private:
     this->m_stitched_image = final_pano;
   }
 
-private:
+ private:
   bool m_resize{};
   std::string m_path;
   types::ImageBatch m_images;
   types::Image m_stitched_image;
+  is::blend::ImageBlending m_blending;
 };
 } // namespace is::stitch
 
