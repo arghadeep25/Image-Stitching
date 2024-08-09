@@ -12,7 +12,7 @@
  * @return The image read from the given path.
  */
 namespace is ::utils {
-types::Image read_image(const std::string &image_path) {
+inline types::Image read_image(const std::string &image_path) {
   if (image_path.empty())
     throw std::invalid_argument("Image path is empty");
   types::Image image = cv::imread(image_path, cv::IMREAD_COLOR);
@@ -27,7 +27,7 @@ types::Image read_image(const std::string &image_path) {
  * @param image_paths
  * @return
  */
-types::ImageBatch read_images(const std::vector<std::string> &image_paths) {
+inline types::ImageBatch read_images(const std::vector<std::string> &image_paths) {
   if (image_paths.empty())
     throw std::invalid_argument("Image paths are empty");
   types::ImageBatch images;
