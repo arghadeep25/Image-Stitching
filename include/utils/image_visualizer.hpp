@@ -16,7 +16,7 @@ namespace is::vis {
  * @param window_name The window name.
  * @return void
  */
-void display(const types::Image &image,
+inline void display(const types::Image &image,
              const std::string &window_name = "Image") {
   cv::imshow(window_name, image);
   cv::waitKey(0);
