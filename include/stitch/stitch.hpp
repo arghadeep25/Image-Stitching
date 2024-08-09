@@ -45,7 +45,6 @@ class Stitch {
  public:
   /**
    * @brief Load images from the given path and set to the image batch.
-   * @todo if images are greater than certain size, automatic resize
    * @param path The path to the directory containing images.
    * @param resize Flag to resize the images.
    */
@@ -96,9 +95,15 @@ class Stitch {
     // Load and optionally resize images
     for (const auto &image_path : image_paths) {
       types::Image image = utils::read_image(image_path);
+      cv::Size image_size = image.size();
       if (this->m_resize) {
         cv::resize(image, image, cv::Size(image.cols / 4, image.rows / 4));
       }
+      // resize automatically if image is high resolution
+      if (image_size.width > 2000 || image_size.height > 2000) {
+        cv::resize(image, image, cv::Size(image.cols / 4, image.rows / 4));
+      }
+
       this->m_images.push_back(image);
     }
 
