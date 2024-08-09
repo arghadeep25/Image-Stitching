@@ -4,16 +4,25 @@
 #include <utils/image_reader.hpp>
 #include <utils/types.hpp>
 
-TEST(OpenCVTest, CanLoadImage) {
-  std::string image_path =
-      std::string(PROJECT_SOURCE_DIR) + "/data/berlin/001.jpg";
-  is::types::Image image = is::utils::read_image(image_path);
-  if (image.empty())
-    std::cout << "Image is empty" << std::endl;
-  ASSERT_FALSE(image.empty());
+class ImageReadTest : public ::testing::Test {
+ protected:
+  is::types::Image src_img;
+  is::types::Image dst_img;
+
+};
+
+TEST_F(ImageReadTest, ReadImageTest_ReturnImage) {
+  ASSERT_NO_THROW({
+    this->src_img = is::utils::read_image(std::string(PROJECT_SOURCE_DIR) + "/data/berlin/001.jpg");
+    this->dst_img = is::utils::read_image(std::string(PROJECT_SOURCE_DIR) + "/data/berlin/002.jpg");
+    EXPECT_FALSE(this->src_img.empty());
+    EXPECT_FALSE(this->dst_img.empty());
+  });
 }
 
-int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+TEST_F(ImageReadTest, HandleImageFailureTest_ThrowException) {
+  ASSERT_THROW({
+     this->src_img = is::utils::read_image(std::string(PROJECT_SOURCE_DIR) + "something.jpg");
+     this->dst_img = is::utils::read_image(std::string(PROJECT_SOURCE_DIR) + "anything.jpg");
+   }, std::runtime_error);
 }
