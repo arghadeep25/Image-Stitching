@@ -4,12 +4,13 @@
 #include <stitch/stitch.hpp>
 #include <utils/image_visualizer.hpp>
 #include <utils/scoped_timer.hpp>
+#include <utils/argument_parser.hpp>
 
 int main(int argc, char *argv[]) {
   std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
+  std::string input_path, output_path;
+  is::utils::parse(argc, argv, input_path, output_path);
   cv::Mat pano;
-  std::string input_path = argc > 1 ? argv[1] : "../data/berlin";
-  std::string output_path = argc > 2 ? argv[2] : "../results/berlin.jpg";
   {
     ScopedTimer timer;
     is::stitch::Stitch stitch;
