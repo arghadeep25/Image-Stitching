@@ -1,15 +1,21 @@
 ## Image Stitching
+![workflow](https://github.com/arghadeep25/Image-Stitching/actions/workflows/cmake.yml/badge.svg)
+![GitHub license](https://badgen.net/github/license/Naereen/Strapdown.js)
+
+[//]: # (![C++]&#40;https://forthebadge.com/images/badges/made-with-c-plus-plus.svg&#41;)
+
+[//]: # (![]&#40;https://socialify.git.ci/arghadeep25/Data-Structures-and-Algorithms/image?font=KoHo&pattern=Plus&theme=Auto&#41;)
 
 ### Description:
 
 #### Sample Data (Berlin)
 <p align="center">
-  <img src="data/berlin/001.jpg" width="16%" /> 
-  <img src="data/berlin/002.jpg" width="16%" />  
-  <img src="data/berlin/003.jpg" width="16%" />
-  <img src="data/berlin/004.jpg" width="16%">  
-  <img src="data/berlin/005.jpg" width="16%"> 
-  <img src="data/berlin/006.jpg" width="16%">  
+  <img src="data/berlin/001.jpg" width="15%" /> 
+  <img src="data/berlin/002.jpg" width="15%" />  
+  <img src="data/berlin/003.jpg" width="15%" />
+  <img src="data/berlin/004.jpg" width="15%">  
+  <img src="data/berlin/005.jpg" width="15%"> 
+  <img src="data/berlin/006.jpg" width="15%">  
 </p> 
 
 #### Results
@@ -17,9 +23,26 @@
   <img src="results/berlin.jpg" width="%" />
 </p>
 
+### Build
+```
+git clone 
+mkdir build && cd build
+cmake .. && make -j6
+```
 
-### Algorithm:
+### Usage
+```
+./image_stitching -i <input_path> -o <output_path>
+```
+Example
+```
+./image_stitching -i ../data/berlin/ -o ../results/berlin.jpg
+```
+### Dependencies
+ - OpenCV >= 4.5.1
+ - C++ 17
 
+### Methodology:
 - #### Feature Extraction
     - Detect features from all the images.
     - Compute descriptors for each keypoint
@@ -49,62 +72,11 @@
     - Gain Compensation
     - Multi-band Blending
 
-### Psuedo Code:
-
-```c++
-// Pseudo-code outline for the image stitching algorithm
-
-// Step 1: Feature Extraction
-for (Image img : images) {
-    SIFTFeatures features = extractSIFT(img);
-    imageFeatures.push_back(features);
-}
-
-// Step 2: Feature Matching
-std::vector<Match> matches;
-for (int i = 0; i < images.size(); i++) {
-    for (int j = i + 1; j < images.size(); j++) {
-        matches.push_back(matchFeatures(imageFeatures[i], imageFeatures[j]));
-    }
-}
-
-// Step 3: Image Matching
-std::vector<ImagePair> imagePairs;
-for (Match match : matches) {
-    Homography H = estimateHomographyRANSAC(match);
-    if (verifyMatch(H, match)) {
-        imagePairs.push_back({match.image1, match.image2, H});
-    }
-}
-
-// Step 4: Panorama Recognition
-std::vector<Panorama> panoramas = findConnectedComponents(imagePairs);
-
-// Step 5: Image Alignment
-for (Panorama& pano : panoramas) {
-    bundleAdjust(pano);
-}
-
-// Step 6: Rendering
-for (Panorama& pano : panoramas) {
-    straighten(pano);
-    gainCompensation(pano);
-    multiBandBlend(pano);
-}
-
-// Step 7: Output
-for (Panorama& pano : panoramas) {
-    savePanorama(pano);
-}
-```
-
-### Diagram
-
-### Paper:
+### Research Paper:
 
 [Automatic Panoramic Image Stitching using Invariant Features](https://www.cs.ubc.ca/~lowe/papers/07brown.pdf)
 
-### Other Links:
+### Additional Links:
 
 - [OpenCV Image Stitching Description](https://docs.opencv.org/3.4/d1/d46/group__stitching.html)
 - [PyImageSearch](https://pyimagesearch.com/2018/12/17/image-stitching-with-opencv-and-python/)
