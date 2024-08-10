@@ -1,6 +1,10 @@
-//
-// Created by arghadeep on 30.07.24.
-//
+/**
+ * @file image_visualizer.hpp
+ * @details Header to visualize the image using OpenCV function.
+ * @author Arghadeep Mazumder
+ * @version 0.1.0
+ * @copyright -
+ */
 
 #ifndef IMAGE_STITCHING_IMAGE_VISUALIZER_HPP_
 #define IMAGE_STITCHING_IMAGE_VISUALIZER_HPP_
@@ -17,7 +21,7 @@ namespace is::vis {
  * @return void
  */
 inline void display(const types::Image &image,
-             const std::string &window_name = "Image") {
+                    const std::string &window_name = "Image") {
   cv::imshow(window_name, image);
   cv::waitKey(0);
 }
