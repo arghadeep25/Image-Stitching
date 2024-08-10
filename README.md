@@ -1,5 +1,5 @@
 ## Image Stitching
-![workflow](https://github.com/arghadeep25/Image-Stitching/actions/workflows/cmake.yml/badge.svg)
+![workflow](https://github.com/arghadeep25/Image-Stitching/actions/workflows/ci.yml/badge.svg)
 ![GitHub license](https://badgen.net/github/license/Naereen/Strapdown.js)
 
 [//]: # (![C++]&#40;https://forthebadge.com/images/badges/made-with-c-plus-plus.svg&#41;)
