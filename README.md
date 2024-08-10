@@ -1,10 +1,9 @@
 ## Image Stitching
 ![workflow](https://github.com/arghadeep25/Image-Stitching/actions/workflows/ci.yml/badge.svg)
 ![GitHub license](https://badgen.net/github/license/Naereen/Strapdown.js)
-
-[//]: # (![C++]&#40;https://forthebadge.com/images/badges/made-with-c-plus-plus.svg&#41;)
-
-[//]: # (![]&#40;https://socialify.git.ci/arghadeep25/Data-Structures-and-Algorithms/image?font=KoHo&pattern=Plus&theme=Auto&#41;)
+![Visitors](https://api.visitorbadge.io/api/visitors?path=https://github.com/arghadeep25/Image-Stitching)
+![C++](https://forthebadge.com/images/badges/made-with-c-plus-plus.svg)
+![Banner](https://socialify.git.ci/arghadeep25/Image-Stitching/image?description=1&font=Jost&forks=1&issues=1&language=1&owner=1&pulls=1&stargazers=1&theme=Auto)
 
 ### Description:
 
@@ -25,7 +24,7 @@
 
 ### Build
 ```
-git clone 
+git clone git@github.com:arghadeep25/Image-Stitching.git
 mkdir build && cd build
 cmake .. && make -j6
 ```
