@@ -1,5 +1,6 @@
 ## Image Stitching
 ![workflow](https://github.com/arghadeep25/Image-Stitching/actions/workflows/ci.yml/badge.svg)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/9296642e70004a5a891bcac45bfa7980)](https://app.codacy.com/gh/arghadeep25/Image-Stitching/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 ![GitHub license](https://badgen.net/github/license/Naereen/Strapdown.js)
 ![Visitors](https://api.visitorbadge.io/api/visitors?path=https://github.com/arghadeep25/Image-Stitching)
 ![C++](https://forthebadge.com/images/badges/made-with-c-plus-plus.svg)
