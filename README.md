@@ -26,8 +26,7 @@
 ### Build
 ```
 git clone git@github.com:arghadeep25/Image-Stitching.git
-mkdir build && cd build
-cmake .. && make -j6
+cmake -S . -B build && cmake --build build -j$(nproc)
 ```
 
 ### Usage
