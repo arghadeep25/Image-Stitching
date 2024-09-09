@@ -25,7 +25,8 @@
 
 ### Build
 ```
-git clone git@github.com:arghadeep25/Image-Stitching.git
+git clone git@github.com:arghadeep25/Image-Stitching.git --recurse-submodules
+cd Image-Stitching/
 cmake -S . -B build && cmake --build build -j$(nproc)
 ```
 
