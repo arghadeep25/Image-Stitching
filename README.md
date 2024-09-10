@@ -2,8 +2,7 @@
 ![workflow](https://github.com/arghadeep25/Image-Stitching/actions/workflows/ci.yml/badge.svg)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/9296642e70004a5a891bcac45bfa7980)](https://app.codacy.com/gh/arghadeep25/Image-Stitching/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 ![GitHub license](https://badgen.net/github/license/Naereen/Strapdown.js)
-![Visitors](https://api.visitorbadge.io/api/visitors?path=https://github.com/arghadeep25/Image-Stitching)
-![C++](https://forthebadge.com/images/badges/made-with-c-plus-plus.svg)
+![C++](https://img.shields.io/badge/Code-C++-informational?style=flat&logo=c%2B%2B&logoColor=white&color=2bbc8a)
 ![Banner](https://socialify.git.ci/arghadeep25/Image-Stitching/image?description=1&font=Jost&forks=1&issues=1&language=1&owner=1&pulls=1&stargazers=1&theme=Auto)
 
 ### Description:
