@@ -10,13 +10,13 @@
 
 #### Sample Data (Berlin)
 <p align="center">
-  <img src="data/berlin/001.jpg" width="15%" /> 
-  <img src="data/berlin/002.jpg" width="15%" />  
+  <img src="data/berlin/001.jpg" width="15%" />
+  <img src="data/berlin/002.jpg" width="15%" />
   <img src="data/berlin/003.jpg" width="15%" />
-  <img src="data/berlin/004.jpg" width="15%">  
-  <img src="data/berlin/005.jpg" width="15%"> 
-  <img src="data/berlin/006.jpg" width="15%">  
-</p> 
+  <img src="data/berlin/004.jpg" width="15%">
+  <img src="data/berlin/005.jpg" width="15%">
+  <img src="data/berlin/006.jpg" width="15%">
+</p>
 
 #### Results
 <p align="center">
@@ -24,9 +24,11 @@
 </p>
 
 ### Build
+
+#### CMake
 ```
-git clone git@github.com:arghadeep25/Image-Stitching.git
-cmake -S . -B build && cmake --build build -j$(nproc)
+git clone git@github.com:arghadeep25/Image-Stitching.git && cd Image-Stitching
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -S . -B build/ && cmake --build build -j$(nproc)
 ```
 
 ### Usage
@@ -40,6 +42,14 @@ Example
 ### Dependencies
  - OpenCV >= 4.5.1
  - C++ 17
+
+### Developer
+
+#### pre-commit hook
+```
+ln -s build/compile_commands.json .
+pre-commit run --all-files
+```
 
 ### Methodology:
 - #### Feature Extraction

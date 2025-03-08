@@ -5,8 +5,8 @@
 #ifndef IMAGE_STITCHING_TYPES_HPP
 #define IMAGE_STITCHING_TYPES_HPP
 
-#include <opencv2/opencv.hpp>
 #include <opencv2/features2d.hpp>
+#include <opencv2/opencv.hpp>
 #include <vector>
 
 namespace is::types {
@@ -44,6 +44,6 @@ using MatchFeature = std::vector<cv::BFMatcher>;
 
 using MatchFeatures = std::vector<MatchFeature>;
 
-} // namespace image_stitching::is
+}  // namespace is::types
 
-#endif // IMAGE_STITCHING_TYPES_HPP
+#endif  // IMAGE_STITCHING_TYPES_HPP

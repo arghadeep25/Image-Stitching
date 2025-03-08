@@ -1,13 +1,16 @@
 #include <gtest/gtest.h>
+
 #include <features/features.hpp>
-#include <utils/types.hpp>
 #include <utils/image_reader.hpp>
+#include <utils/types.hpp>
 
 class FeatureTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    this->src_img = is::utils::read_image(std::string(PROJECT_SOURCE_DIR) + "/data/berlin/001.jpg");
-    this->dst_img = is::utils::read_image(std::string(PROJECT_SOURCE_DIR) + "/data/berlin/002.jpg");
+    this->src_img = is::utils::read_image(std::string(PROJECT_SOURCE_DIR) +
+                                          "/data/berlin/001.jpg");
+    this->dst_img = is::utils::read_image(std::string(PROJECT_SOURCE_DIR) +
+                                          "/data/berlin/002.jpg");
 
     if (this->src_img.empty() || this->dst_img.empty()) {
       GTEST_SKIP() << "Could not load images";
@@ -27,24 +30,32 @@ TEST_F(FeatureTest, ComputeHomographyTest_ValidImages_ReturnsHomography) {
 }
 
 TEST_F(FeatureTest, ComputeHomographyTest_EmptyImages_ThrowsException) {
-  ASSERT_THROW({
-     is::types::Image empty_img;
-     this->m_features.compute_homography(empty_img, empty_img);
-   }, std::runtime_error);
+  ASSERT_THROW(
+      {
+        is::types::Image empty_img;
+        this->m_features.compute_homography(empty_img, empty_img);
+      },
+      std::runtime_error);
 }
 
 TEST_F(FeatureTest, ComputeHomographyTest_EmptyDstImage_ThrowsException) {
-  ASSERT_THROW({
-     this->src_img = is::utils::read_image(std::string(PROJECT_SOURCE_DIR) + "/data/berlin/001.jpg");
-     is::types::Image empty_img;
-     this->m_features.compute_homography(this->src_img, empty_img);
-   }, std::runtime_error);
+  ASSERT_THROW(
+      {
+        this->src_img = is::utils::read_image(std::string(PROJECT_SOURCE_DIR) +
+                                              "/data/berlin/001.jpg");
+        is::types::Image empty_img;
+        this->m_features.compute_homography(this->src_img, empty_img);
+      },
+      std::runtime_error);
 }
 
 TEST_F(FeatureTest, ComputeHomographyTest_EmptySrcImage_ThrowsException) {
-  ASSERT_THROW({
-     this->dst_img = is::utils::read_image(std::string(PROJECT_SOURCE_DIR) + "/data/berlin/001.jpg");
-     is::types::Image empty_img;
-     this->m_features.compute_homography(empty_img, this->dst_img);
-   }, std::runtime_error);
+  ASSERT_THROW(
+      {
+        this->dst_img = is::utils::read_image(std::string(PROJECT_SOURCE_DIR) +
+                                              "/data/berlin/001.jpg");
+        is::types::Image empty_img;
+        this->m_features.compute_homography(empty_img, this->dst_img);
+      },
+      std::runtime_error);
 }

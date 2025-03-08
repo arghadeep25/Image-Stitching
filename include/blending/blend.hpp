@@ -9,13 +9,12 @@
 #ifndef IMAGE_STITCHING_BLEND_HPP
 #define IMAGE_STITCHING_BLEND_HPP
 
-#include <iostream>
-#include <vector>
-
 #include <features/features.hpp>
+#include <iostream>
 #include <opencv2/opencv.hpp>
 #include <utils/image_visualizer.hpp>
 #include <utils/types.hpp>
+#include <vector>
 
 namespace is::blend {
 /**
@@ -64,7 +63,8 @@ class ImageBlending {
                     : static_cast<int>(src_warped_corners[3].x);
 
     if (panorama_size.height == 0 || panorama_size.width == 0)
-      throw std::runtime_error("Unable to estimate the size of the panorama image");
+      throw std::runtime_error(
+          "Unable to estimate the size of the panorama image");
 
     // Translation Matrix
     cv::Mat Ht = cv::Mat::eye(3, 3, homography.type());
@@ -117,7 +117,8 @@ class ImageBlending {
                         const cv::Mat &homography) {
     if (src_img_size.height == 0 || src_img_size.width == 0 ||
         dst_img_size.height == 0 || dst_img_size.width == 0)
-      throw std::runtime_error("Unable to compute Perspective Transformation. Image size is zero");
+      throw std::runtime_error(
+          "Unable to compute Perspective Transformation. Image size is zero");
 
     if (homography.empty())
       throw std::runtime_error("Homography matrix is empty");
@@ -157,10 +158,9 @@ class ImageBlending {
    * @param points The points to extract min and max points from.
    * @return The min and max points.
    */
-  std::pair<cv::Point2f, cv::Point2f>
-  min_max_points(const std::vector<cv::Point2f> &points) {
-    if (points.empty())
-      throw std::runtime_error("Points are empty");
+  std::pair<cv::Point2f, cv::Point2f> min_max_points(
+      const std::vector<cv::Point2f> &points) {
+    if (points.empty()) throw std::runtime_error("Points are empty");
 
     cv::Point2f min_point, max_point;
     float min_x = std::numeric_limits<float>::max();
@@ -202,7 +202,7 @@ class ImageBlending {
         for (int i = 0; i < height; ++i) {
           for (int j = barrier - offset; j <= barrier + offset; ++j) {
             mask.at<float>(i, j) =
-                1 - (float) (j - (barrier - offset)) / (2 * offset + 1);
+                1 - (float)(j - (barrier - offset)) / (2 * offset + 1);
           }
         }
         mask.colRange(0, barrier - offset).setTo(1);
@@ -210,7 +210,7 @@ class ImageBlending {
         for (int i = 0; i < height; ++i) {
           for (int j = barrier - offset; j <= barrier + offset; ++j) {
             mask.at<float>(i, j) =
-                (float) (j - (barrier - offset)) / (2 * offset + 1);
+                (float)(j - (barrier - offset)) / (2 * offset + 1);
           }
         }
         mask.colRange(barrier + offset, width).setTo(1);
@@ -220,7 +220,7 @@ class ImageBlending {
         for (int i = 0; i < height; ++i) {
           for (int j = barrier - offset; j < barrier + offset; ++j) {
             mask.at<float>(i, j) =
-                1 - (float) (j - (barrier - offset)) / (2 * offset);
+                1 - (float)(j - (barrier - offset)) / (2 * offset);
           }
         }
         mask.colRange(0, barrier - offset).setTo(1);
@@ -228,7 +228,7 @@ class ImageBlending {
         for (int i = 0; i < height; ++i) {
           for (int j = barrier - offset; j < barrier + offset; ++j) {
             mask.at<float>(i, j) =
-                (float) (j - (barrier - offset)) / (2 * offset);
+                (float)(j - (barrier - offset)) / (2 * offset);
           }
         }
         mask.colRange(barrier + offset, width).setTo(1);
@@ -252,10 +252,8 @@ class ImageBlending {
    * @param dst_mask The destination mask.
    * @return The blended images.
    */
-  types::Image left_blending(types::Image &src_image,
-                             types::Image &dst_image,
-                             types::Image &src_mask,
-                             types::Image &dst_mask) {
+  types::Image left_blending(types::Image &src_image, types::Image &dst_image,
+                             types::Image &src_mask, types::Image &dst_mask) {
     cv::flip(dst_image, dst_image, 1);
     cv::flip(src_image, src_image, 1);
 
@@ -280,10 +278,8 @@ class ImageBlending {
    * @param dst_mask The destination mask.
    * @return The blended images.
    */
-  types::Image right_blending(types::Image &src_image,
-                              types::Image &dst_image,
-                              types::Image &src_mask,
-                              types::Image &dst_mask) {
+  types::Image right_blending(types::Image &src_image, types::Image &dst_image,
+                              types::Image &src_mask, types::Image &dst_mask) {
     dst_image = dst_image.mul(dst_mask);
     dst_image.convertTo(dst_image, CV_8U);
 
@@ -292,13 +288,13 @@ class ImageBlending {
 
     return src_image + dst_image;
 
-//    cv::Mat pano = src_image + dst_image;
+    //    cv::Mat pano = src_image + dst_image;
 
     // Normalize and convert to CV_8U
     // cv::normalize(pano, pano, 0, 255, cv::NORM_MINMAX);
     // pano.convertTo(pano, CV_8U);
 
-//    return pano;
+    //    return pano;
   }
 
  private:
@@ -326,7 +322,8 @@ class ImageBlending {
     cv::Mat mask2 = blend_mask(dst_img_size.height, dst_img_size.width, barrier,
                                smoothing_window, false);
     if (mask1.empty() || mask2.empty())
-      throw std::runtime_error("Unable to generate masks for panorama blending");
+      throw std::runtime_error(
+          "Unable to generate masks for panorama blending");
 
     // Copy the images
     cv::Mat dst_img_rz_copy = dst_img_rz.clone();
@@ -336,8 +333,10 @@ class ImageBlending {
     src_img_warped_copy.convertTo(src_img_warped_copy, CV_32F);
 
     // Blending process
-    return left_biased ? this->left_blending(src_img_warped_copy, dst_img_rz_copy, mask2, mask1)
-                       : this->right_blending(src_img_warped_copy, dst_img_rz_copy, mask2, mask1);
+    return left_biased ? this->left_blending(src_img_warped_copy,
+                                             dst_img_rz_copy, mask2, mask1)
+                       : this->right_blending(src_img_warped_copy,
+                                              dst_img_rz_copy, mask2, mask1);
   }
 
  private:
@@ -350,11 +349,9 @@ class ImageBlending {
    */
   cv::Mat crop(const cv::Mat &panorama, const int &height,
                const std::vector<cv::Point2f> &corners) {
-    if (panorama.empty())
-      throw std::runtime_error("Panorama image is empty");
+    if (panorama.empty()) throw std::runtime_error("Panorama image is empty");
 
-    if (corners.empty())
-      throw std::runtime_error("Corners are empty");
+    if (corners.empty()) throw std::runtime_error("Corners are empty");
 
     cv::Point2f min_point, max_point;
     auto min_max_points = this->min_max_points(corners);
@@ -369,12 +366,12 @@ class ImageBlending {
       cropped_panorama = panorama(roi);
     } else {
       cv::Rect roi(0, static_cast<int>(translation.y),
-                   (int) std::min(corners[2].x, corners[3].x), height);
+                   (int)std::min(corners[2].x, corners[3].x), height);
       cropped_panorama = panorama(roi);
     }
     return cropped_panorama;
   }
 };
-} // namespace is::blend
+}  // namespace is::blend
 
-#endif // IMAGE_STITCHING_BLEND_HPP
+#endif  // IMAGE_STITCHING_BLEND_HPP

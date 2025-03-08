@@ -18,8 +18,9 @@ struct ScopedTimer {
   ScopedTimer() : start(Clock::now()) {}
   ~ScopedTimer() {
     const auto end = Clock::now();
-    std::cout << std::chrono::duration<double>(end - start).count() << " seconds" << std::endl;
+    std::cout << std::chrono::duration<double>(end - start).count()
+              << " seconds" << std::endl;
   }
 };
 
-#endif // IMAGE_STITCHING_SCOPED_TIMER_HPP
+#endif  // IMAGE_STITCHING_SCOPED_TIMER_HPP

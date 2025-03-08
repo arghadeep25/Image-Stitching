@@ -13,8 +13,7 @@
  */
 namespace is ::utils {
 inline types::Image read_image(const std::string &image_path) {
-  if (image_path.empty())
-    throw std::invalid_argument("Image path is empty");
+  if (image_path.empty()) throw std::invalid_argument("Image path is empty");
   types::Image image = cv::imread(image_path, cv::IMREAD_COLOR);
   if (image.empty())
     throw std::runtime_error("Could not read the image: " + image_path);
@@ -27,14 +26,14 @@ inline types::Image read_image(const std::string &image_path) {
  * @param image_paths
  * @return
  */
-inline types::ImageBatch read_images(const std::vector<std::string> &image_paths) {
-  if (image_paths.empty())
-    throw std::invalid_argument("Image paths are empty");
+inline types::ImageBatch read_images(
+    const std::vector<std::string> &image_paths) {
+  if (image_paths.empty()) throw std::invalid_argument("Image paths are empty");
   types::ImageBatch images;
   for (const auto &image_path : image_paths)
     images.push_back(read_image(image_path));
   return images;
 }
 
-}// namespace is::utils
-#endif// IMAGE_STITCHING_IMAGE_READER_HPP
+}  // namespace is::utils
+#endif  // IMAGE_STITCHING_IMAGE_READER_HPP

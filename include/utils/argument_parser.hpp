@@ -8,8 +8,9 @@
 #ifndef IMAGE_STITCHING_ARGUMENT_PARSER_HPP_
 #define IMAGE_STITCHING_ARGUMENT_PARSER_HPP_
 
-#include <iostream>
 #include <unistd.h>
+
+#include <iostream>
 
 namespace is::utils {
 /**
@@ -19,23 +20,29 @@ namespace is::utils {
  * @param input_path The input path.
  * @param output_path The output path.
  */
-void parse(int argc, char *argv[], std::string &input_path, std::string &output_path) {
+void parse(int argc, char *argv[], std::string &input_path,
+           std::string &output_path) {
   if (argc < 5) {
-    std::cerr << "Usage: " << argv[0] << " -i <input_path> -o <output_path>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " -i <input_path> -o <output_path>"
+              << std::endl;
     exit(EXIT_FAILURE);
   }
   int opt;
   while ((opt = getopt(argc, argv, "i:o:")) != -1) {
     switch (opt) {
-      case 'i':input_path = optarg;
+      case 'i':
+        input_path = optarg;
         break;
-      case 'o':output_path = optarg;
+      case 'o':
+        output_path = optarg;
         break;
-      default:std::cerr << "Usage: " << argv[0] << " -i <input_path> -o <output_path>" << std::endl;
+      default:
+        std::cerr << "Usage: " << argv[0] << " -i <input_path> -o <output_path>"
+                  << std::endl;
         exit(EXIT_FAILURE);
     }
   }
 }
 
-} // namespace is::utils
-#endif //IMAGE_STITCHING_ARGUMENT_PARSER_HPP_
+}  // namespace is::utils
+#endif  // IMAGE_STITCHING_ARGUMENT_PARSER_HPP_

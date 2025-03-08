@@ -38,13 +38,13 @@ class Features {
     double confidence = 0.995;
   };
 
-public:
+ public:
   Features() = default;
 
-public:
+ public:
   ~Features() = default;
 
-public:
+ public:
   /**
    * @brief Compute the homography matrix using RANSAC. First the features
    * are extracted from the images using SIFT descriptor. Then the features
@@ -93,7 +93,7 @@ public:
     return homography;
   }
 
-private:
+ private:
   /**
    * @brief Extract features from the image using SIFT descriptor. The
    * keypoints and descriptors are returned. If the image is colored, it is
@@ -109,11 +109,9 @@ private:
   types::ImageFeature extract_features(const types::Image &img) {
     types::Image img_clone = img.clone();
 
-    if (img.empty())
-      throw std::runtime_error("Image is empty");
+    if (img.empty()) throw std::runtime_error("Image is empty");
 
-    if (img.channels() != 1)
-      cv::cvtColor(img, img_clone, cv::COLOR_BGR2GRAY);
+    if (img.channels() != 1) cv::cvtColor(img, img_clone, cv::COLOR_BGR2GRAY);
 
     types::Keypoints keypoints;
     types::Image descriptors;
@@ -127,7 +125,7 @@ private:
     return {keypoints, descriptors};
   }
 
-private:
+ private:
   /**
    * Match the features of the images using Brute-Force Matcher
    * or Flann based Matcher. The matches are filtered using the ratio test.
@@ -153,8 +151,7 @@ private:
       throw std::runtime_error("Invalid matcher type");
     }
 
-    if (matches.empty())
-      throw std::runtime_error("Matches are empty");
+    if (matches.empty()) throw std::runtime_error("Matches are empty");
 
     types::MatchedFeatures good_matches;
     for (auto &match : matches)
@@ -167,7 +164,7 @@ private:
     return good_matches;
   }
 
-private:
+ private:
   /**
    * Draw the matches between the images. The matches are visualized using
    * drawMatches. The matched features are displayed.
@@ -196,9 +193,9 @@ private:
     cv::waitKey(0);
   }
 
-public:
+ public:
   FeaturesParameters params;
 };
-} // namespace is::features
+}  // namespace is::features
 
-#endif // IMAGE_STITCHING__FEATURES_HPP_
+#endif  // IMAGE_STITCHING__FEATURES_HPP_

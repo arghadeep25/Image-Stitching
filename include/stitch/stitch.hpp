@@ -80,7 +80,7 @@ class Stitch {
 
     // Collect all image file paths
     for (const auto &entry :
-        std::filesystem::directory_iterator(this->m_path)) {
+         std::filesystem::directory_iterator(this->m_path)) {
       if (entry.is_regular_file() && entry.path().extension() == ".jpg") {
         image_paths.push_back(entry.path().string());
       }
@@ -107,8 +107,7 @@ class Stitch {
       this->m_images.push_back(image);
     }
 
-    if (this->m_images.empty())
-      throw std::runtime_error("No images loaded.");
+    if (this->m_images.empty()) throw std::runtime_error("No images loaded.");
   }
 
  private:
@@ -117,8 +116,7 @@ class Stitch {
    * @details
    */
   void stich_image_batch(types::ImageBatch &images) {
-    if (images.empty())
-      throw std::runtime_error("No images to stitch.");
+    if (images.empty()) throw std::runtime_error("No images to stitch.");
 
     while (images.size() > 1) {
       types::Image dst_img = images.back();
@@ -177,6 +175,6 @@ class Stitch {
   types::Image m_stitched_image;
   is::blend::ImageBlending m_blending;
 };
-} // namespace is::stitch
+}  // namespace is::stitch
 
-#endif // IMAGE_STITCHING_STITCH_HPP
+#endif  // IMAGE_STITCHING_STITCH_HPP

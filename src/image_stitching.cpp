@@ -2,9 +2,9 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <stitch/stitch.hpp>
+#include <utils/argument_parser.hpp>
 #include <utils/image_visualizer.hpp>
 #include <utils/scoped_timer.hpp>
-#include <utils/argument_parser.hpp>
 
 int main(int argc, char *argv[]) {
   std::cout << "OpenCV Version: " << CV_VERSION << std::endl;

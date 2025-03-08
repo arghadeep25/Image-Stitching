@@ -25,6 +25,6 @@ inline void display(const types::Image &image,
   cv::imshow(window_name, image);
   cv::waitKey(0);
 }
-} // namespace is::vis
+}  // namespace is::vis
 
-#endif // IMAGE_STITCHING_IMAGE_VISUALIZER_HPP_
+#endif  // IMAGE_STITCHING_IMAGE_VISUALIZER_HPP_

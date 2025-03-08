@@ -7,3 +7,7 @@ cmake-build-debug/
 documentation/
 build/
 !results/*.jpg
+bazel-*/
+bazel_build/
+MODULE.bazel
+MODULE.bazel.lock
